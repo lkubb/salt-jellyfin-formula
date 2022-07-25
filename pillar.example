@@ -1,0 +1,250 @@
+# -*- coding: utf-8 -*-
+# vim: ft=yaml
+# yamllint disable rule:comments-indentation
+---
+jellyfin:
+  install:
+      # Install rootless containers running as dedicated user.
+    rootless: true
+      # When applying `clean` states, also remove application data.
+      # Setting this to true might incur accidental data loss!
+    remove_all_data_for_sure: false
+  config:
+      # This manages encoding options found in config/encoding.xml.
+      # For example values, see below.
+    encoding: {}
+    general:
+        # The value to set for the FFmpeg analyzeduration format option. See the
+        # FFmpg documentation(https://ffmpeg.org/ffmpeg-formats.html#Format-Options)
+        # for more details. Defaults to "200M".
+      FFmpeg:analyzeduration: null
+        # Value to set for the FFmpeg probesize format option.
+        # See the FFmpg documentation (link above)
+        # for more details. Defaults to "1G".
+      FFmpeg:probesize: null
+        # The default redirect path to use for requests where the URL base prefix is
+        # invalid or missing. Defaults to "web/index.html" if hostwebclient is true;
+        # "swagger/index.html" if hostwebclient is false.
+      HttpListenerHost:DefaultRedirectPath: null
+        # The URL for the plugin repository JSON manifest. Defaults to
+        # "https://repo.jellyfin.org/releases/plugin/manifest.json"
+      InstallationManager:PluginManifestUrl: null
+        # The Server URL to publish in udp Auto Discovery response.
+        # Defaults to Server Url based on primary IP address.
+      PublishedServerUrl: null
+        # Set to True if the server should host the web client. Defaults to true.
+      hostwebclient: null
+        # Whether playlists should allow duplicate items or automatically filter
+        # them out. Defaults to true.
+      playlists:allowDuplicates: null
+      # This manages network configuration found in config/network.xml
+      # For example values, see below.
+    network:
+      HttpServerPortNumber: 8096
+      HttpsPortNumber: 8920
+      # This manages server/system configuration found in config/system.xml.
+      # For example values, see below.
+    system: {}
+  container:
+      # Port on the host that will be mapped to emby default port (8096)
+    host_port: 3771
+      # Port on the host that will be mapped to emby https port (8920) if enabled.
+    host_port_https: 3772
+      # Map UDP ports 1900 and 7359 to the same ports on the host.
+    pass_autodiscovery: false
+      # Map the port defined above to emby https port.
+    pass_https: false
+      # When userns_keep_id is in use, pgid should be the same as the dedicated
+      # media group which owns the data. This formula syncs them automatically,
+      # so you should leave it unset.
+    pgid: null
+    puid: null
+      # This maps the UID/GID of the user running the container to the same ones
+      # inside it. This allows to run the container process unprivileged, but
+      # still e.g. write to network shares with the same permissions as the host
+      # user (NFS/SMB do not know about host user namespaces of course).
+      # (see also comment on lookup:media_group)
+      # This is only allowed for rootless containers.
+    userns_keep_id: true
+  mount_paths: []
+
+
+  ######################################################################################
+  # Jellyfin example configuration for xml config files
+  # encoding:
+  #   EncodingThreadCount: -1
+  #   EnableFallbackFont: false
+  #   DownMixAudioBoost: 2
+  #   MaxMuxingQueueSize: 2048
+  #   EnableThrottling: false
+  #   ThrottleDelaySeconds: 180
+  #   EncoderAppPathDisplay: /usr/lib/jellyfin-ffmpeg/ffmpeg
+  #   VaapiDevice: /dev/dri/renderD128
+  #   EnableTonemapping: false
+  #   EnableVppTonemapping: false
+  #   TonemappingAlgorithm: bt2390
+  #   TonemappingRange: auto
+  #   TonemappingDesat: 0
+  #   TonemappingThreshold: 0.8
+  #   TonemappingPeak: 100
+  #   TonemappingParam: 0
+  #   VppTonemappingBrightness: 0
+  #   VppTonemappingContrast: 1.2
+  #   H264Crf: 23
+  #   H265Crf: 28
+  #   DeinterlaceDoubleRate: false
+  #   DeinterlaceMethod: yadif
+  #   EnableDecodingColorDepth10Hevc:true
+  #   EnableDecodingColorDepth10Vp9: true
+  #   EnableEnhancedNvdecDecoder: false
+  #   PreferSystemNativeHwDecoder: true
+  #   EnableIntelLowPowerH264HwEncoder: false
+  #   EnableIntelLowPowerHevcHwEncoder: false
+  #   EnableHardwareEncoding: true
+  #   AllowHevcEncoding: false
+  #   EnableSubtitleExtraction: true
+  #   HardwareDecodingCodecs:
+  #     - h264
+  #     - vc1
+  #   AllowOnDemandMetadataBasedKeyframeExtractionForExtensions:
+  #     - mkv
+  #
+  # network:
+  #   RequireHttps: false
+  #   CertificatePath: null
+  #   CertificatePassword: null
+  #   BaseUrl: null
+  #   PublicHttpsPort: 8920
+  #   HttpServerPortNumber: 8096
+  #   EnableHttps: false
+  #   PublicPort: 8096
+  #   EnableIPV6: false
+  #   EnableIPV4: true
+  #   IgnoreVirtualInterfaces: true
+  #   VirtualInterfaceNames: vEthernet*
+  #   TrustAllIP6Interfaces: false
+  #   PublishedServerUriBySubnet: null
+  #   RemoteIPFilter: null
+  #   IsRemoteIPFilterBlacklist: false
+  #   EnableUPnP: false
+  #   EnableRemoteAccess: true
+  #   LocalNetworkSubnets: null
+  #   LocalNetworkAddresses: null
+  #   KnownProxies: null
+  #   AutoDiscovery: true
+  #
+  # server:
+  #   LogFileRetentionDays: 3
+  #   IsStartupWizardCompleted: false
+  #   EnableMetrics: false
+  #   EnableNormalizedItemByNameIds: true
+  #   IsPortAuthorized: true
+  #   QuickConnectAvailable: true
+  #   EnableCaseSensitiveItemIds: true
+  #   DisableLiveTvChannelUserDataName: true
+  #   MetadataPath: null
+  #   MetadataNetworkPath: null
+  #   PreferredMetadataLanguage: en
+  #   MetadataCountryCode: US
+  #   MinResumePct: 5
+  #   MaxResumePct: 90
+  #   MinResumeDurationSeconds: 300
+  #   MinAudiobookResume: 5
+  #   MaxAudiobookResume: 5
+  #   LibraryMonitorDelay: 60
+  #   ImageSavingConvention: Legacy
+  #   SkipDeserializationForBasicTypes: true
+  #   ServerName: null
+  #   UICulture: en
+  #   SaveMetadataHidden: false
+  #   ContentTypes: null
+  #   RemoteClientBitrateLimit: 0
+  #   EnableFolderView: false
+  #   EnableGroupingIntoCollections: false
+  #   DisplaySpecialsWithinSeasons: true
+  #   CodecsUsed: null
+  #   EnableExternalContentInSuggestions: true
+  #   ImageExtractionTimeoutMs: 0
+  #   PathSubstitutions: null
+  #   EnableSlowResponseWarning: true
+  #   SlowResponseThresholdMs: 500
+  #   CorsHosts:
+  #     - *
+  #   ActivityLogRetentionDays: 30
+  #   LibraryScanFanoutConcurrency: 0
+  #   LibraryMetadataRefreshConcurrency: 0
+  #   RemoveOldPlugins: false
+  #   AllowClientLogUpload: true
+  ######################################################################################
+
+  lookup:
+    rootgroup: root
+    compose:
+      create_pod: null
+      pod_args: null
+      project_name: jellyfin
+      remove_orphans: true
+      service:
+        container_prefix: null
+        ephemeral: true
+        pod_prefix: null
+        restart_policy: on-failure
+        separator: null
+        stop_timeout: null
+    paths:
+      base: /opt/containers/jellyfin
+      compose: docker-compose.yml
+      config_jellyfin: jellyfin.env
+      cache: ''
+      data: data
+    user:
+      groups: []
+      home: null
+      name: jellyfin
+      shell: /usr/sbin/nologin
+      uid: null
+      gid: null
+    containers:
+      jellyfin:
+        image: docker.io/jellyfin/jellyfin:latest
+      # This formula generally assumes Jellyfin needs to work with other programs
+      # on the same data, thus the dedicated media group. The data should
+      # be owned by this group and have group rw permissions set.
+      # This is especially needed when two or more rootless containers are running
+      # on the same host and need access to the same data. This might be superfluous
+      # once rootless network share mounting is easily possible.
+    media_group:
+      gid: 3414
+      name: mediarr
+
+  tofs:
+      # The files_switch key serves as a selector for alternative
+      # directories under the formula files directory. See TOFS pattern
+      # doc for more info.
+      # Note: Any value not evaluated by `config.get` will be used literally.
+      # This can be used to set custom paths, as many levels deep as required.
+    files_switch:
+      - any/path/can/be/used/here
+      - id
+      - roles
+      - osfinger
+      - os
+      - os_family
+
+      # All aspects of path/file resolution are customisable using the options below.
+      # This is unnecessary in most cases; there are sensible defaults.
+      # Default path: salt://< path_prefix >/< dirs.files >/< dirs.default >
+      # I.e.: salt://jellyfin/files/default
+      # path_prefix: template_alt
+      # dirs:
+      #   files: files_alt
+      #   default: default_alt
+      # The entries under `source_files` are prepended to the default source files
+      # given for the state
+    source_files:
+      Jellyfin compose file is managed:
+        - docker-compose_alt.yml
+        - docker-compose_alt.yml.j2
+      jellyfin environment file is managed:
+        - jellyfin_alt.env
+        - jellyfin_alt.env.j2

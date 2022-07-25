@@ -1,0 +1,45 @@
+---
+version: "3"
+services:
+  jellyfin:
+    image: {{ jellyfin.lookup.containers.jellyfin.image }}
+    container_name: jellyfin
+    user: {{ jellyfin.container.puid or salt["user.info"](jellyfin.lookup.user.name).uid }}:{{ jellyfin.container.pgid or salt["user.info"](jellyfin.lookup.user.name).gid }}
+    env_file:
+      - {{ jellyfin.lookup.paths.config_jellyfin }}
+    volumes:
+      - {{ jellyfin.lookup.paths.cache or "jellyfin-cache" }}:/cache
+      - {{ jellyfin.lookup.paths.data or "jellyfin-data" }}:/config
+{%- for path in jellyfin.mount_paths %}
+{%-   if path is mapping %}
+      - {{ path | first }}:{{ path.values() | first }}
+{%-   else %}
+      - {{ path }}:{{ path }}
+{%-   endif %}
+{%- endfor %}
+    ports:
+      - {{ jellyfin.container.host_port }}:{{ jellyfin.config.network.HttpServerPortNumber }}
+{%- if jellyfin.container.pass_https %}
+      - {{ jellyfin.container.host_port_https }}:{{ jellyfin.config.network.HttpsPortNumber }}
+{%- endif %}
+{%- if jellyfin.container.pass_autodiscovery %}
+      - 7359:7359/udp
+      - 1900:1900/udp
+{%- endif %}
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+{%- if not (jellyfin.lookup.paths.cache and jellyfin.lookup.paths.data) %}
+
+volumes:
+{%-   if not jellyfin.lookup.paths.cache %}
+  jellyfin-cache:
+{%-   endif %}
+{%-   if not jellyfin.lookup.paths.data %}
+  jellyfin-data:
+{%-   endif %}
+{%- endif %}
