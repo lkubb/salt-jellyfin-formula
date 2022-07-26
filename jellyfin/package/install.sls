@@ -32,6 +32,8 @@ Jellyfin user session is initialized at boot:
   compose.lingering_managed:
     - name: {{ jellyfin.lookup.user.name }}
     - enable: {{ jellyfin.install.rootless }}
+    - require:
+      - user: {{ jellyfin.lookup.user.name }}
 
 Jellyfin paths are present:
   file.directory:

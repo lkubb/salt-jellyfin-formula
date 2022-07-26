@@ -43,6 +43,9 @@ Jellyfin user account is absent:
     - purge: {{ jellyfin.install.remove_all_data_for_sure }}
     - require:
       - Jellyfin is absent
+    - retry:
+        attempts: 5
+        interval: 2
 
 {%- if jellyfin.install.remove_all_data_for_sure %}
 
