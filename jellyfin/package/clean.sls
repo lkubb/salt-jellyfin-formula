@@ -8,6 +8,18 @@
 include:
   - {{ sls_config_clean }}
 
+{%- if jellyfin.install.autoupdate_service %}
+
+Podman autoupdate service is disabled for Jellyfin:
+{%-   if jellyfin.install.rootless %}
+  compose.systemd_service_disabled:
+    - user: {{ jellyfin.lookup.user.name }}
+{%-   else %}
+  service.disabled:
+{%-   endif %}
+    - name: podman-auto-update.timer
+{%- endif %}
+
 Jellyfin is absent:
   compose.removed:
     - name: {{ jellyfin.lookup.paths.compose }}

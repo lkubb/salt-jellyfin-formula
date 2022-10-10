@@ -7,6 +7,10 @@ services:
     user: {{ jellyfin.container.puid or salt["user.info"](jellyfin.lookup.user.name).uid }}:{{ jellyfin.container.pgid or salt["user.info"](jellyfin.lookup.user.name).gid }}
     env_file:
       - {{ jellyfin.lookup.paths.config_jellyfin }}
+{%- if jellyfin.install.autoupdate %}
+    labels:
+      - io.containers.autoupdate=registry
+{%- endif %}
     volumes:
       - {{ jellyfin.lookup.paths.cache or "jellyfin-cache" }}:/cache
       - {{ jellyfin.lookup.paths.data or "jellyfin-data" }}:/config

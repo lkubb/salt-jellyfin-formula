@@ -93,3 +93,15 @@ Jellyfin is installed:
 Custom Jellyfin xml serializer is installed:
   saltutil.sync_serializers:
     - refresh: true
+
+{%- if jellyfin.install.autoupdate_service is not none %}
+
+Podman autoupdate service is managed for Jellyfin:
+{%-   if jellyfin.install.rootless %}
+  compose.systemd_service_{{ "enabled" if jellyfin.install.autoupdate_service else "disabled" }}:
+    - user: {{ jellyfin.lookup.user.name }}
+{%-   else %}
+  service.{{ "enabled" if jellyfin.install.autoupdate_service else "disabled" }}:
+{%-   endif %}
+    - name: podman-auto-update.timer
+{%- endif %}
