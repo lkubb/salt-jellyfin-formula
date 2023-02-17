@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 # vim: ft=sls
 
-{%- set tplroot = tpldir.split('/')[0] %}
+{%- set tplroot = tpldir.split("/")[0] %}
 {%- from tplroot ~ "/map.jinja" import mapdata as jellyfin with context %}
 {%- from tplroot ~ "/libtofs.jinja" import files_switch with context %}
 
@@ -45,11 +44,28 @@ Jellyfin paths are present:
     - require:
       - user: {{ jellyfin.lookup.user.name }}
 
+{%- if jellyfin.install.podman_api %}
+
+Jellyfin podman API is enabled:
+  compose.systemd_service_enabled:
+    - name: podman
+    - user: {{ jellyfin.lookup.user.name }}
+    - require:
+      - Jellyfin user session is initialized at boot
+
+Jellyfin podman API is available:
+  compose.systemd_service_running:
+    - name: podman
+    - user: {{ jellyfin.lookup.user.name }}
+    - require:
+      - Jellyfin user session is initialized at boot
+{%- endif %}
+
 Jellyfin compose file is managed:
   file.managed:
     - name: {{ jellyfin.lookup.paths.compose }}
-    - source: {{ files_switch(['docker-compose.yml', 'docker-compose.yml.j2'],
-                              lookup='Jellyfin compose file is present'
+    - source: {{ files_switch(["docker-compose.yml", "docker-compose.yml.j2"],
+                              lookup="Jellyfin compose file is present"
                  )
               }}
     - mode: '0644'

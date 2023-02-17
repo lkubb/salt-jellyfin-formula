@@ -1,8 +1,14 @@
-# -*- coding: utf-8 -*-
 # vim: ft=sls
 
-{%- set tplroot = tpldir.split('/')[0] %}
-{%- set sls_config_clean = tplroot ~ '.config.clean' %}
+{#-
+    Removes the jellyfin containers
+    and the corresponding user account and service units.
+    Has a depency on `jellyfin.config.clean`_.
+    If ``remove_all_data_for_sure`` was set, also removes all data.
+#}
+
+{%- set tplroot = tpldir.split("/")[0] %}
+{%- set sls_config_clean = tplroot ~ ".config.clean" %}
 {%- from tplroot ~ "/map.jinja" import mapdata as jellyfin with context %}
 
 include:
@@ -40,6 +46,25 @@ Jellyfin compose file is absent:
     - name: {{ jellyfin.lookup.paths.compose }}
     - require:
       - Jellyfin is absent
+
+{%- if jellyfin.install.podman_api %}
+
+Jellyfin podman API is unavailable:
+  compose.systemd_service_dead:
+    - name: podman
+    - user: {{ jellyfin.lookup.user.name }}
+    - onlyif:
+      - fun: user.info
+        name: {{ jellyfin.lookup.user.name }}
+
+Jellyfin podman API is disabled:
+  compose.systemd_service_disabled:
+    - name: podman
+    - user: {{ jellyfin.lookup.user.name }}
+    - onlyif:
+      - fun: user.info
+        name: {{ jellyfin.lookup.user.name }}
+{%- endif %}
 
 Jellyfin user session is not initialized at boot:
   compose.lingering_managed:
