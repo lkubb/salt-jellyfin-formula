@@ -51,7 +51,7 @@ Jellyfin compose file is absent:
 
 Jellyfin podman API is unavailable:
   compose.systemd_service_dead:
-    - name: podman
+    - name: podman.socket
     - user: {{ jellyfin.lookup.user.name }}
     - onlyif:
       - fun: user.info
@@ -59,7 +59,7 @@ Jellyfin podman API is unavailable:
 
 Jellyfin podman API is disabled:
   compose.systemd_service_disabled:
-    - name: podman
+    - name: podman.socket
     - user: {{ jellyfin.lookup.user.name }}
     - onlyif:
       - fun: user.info
