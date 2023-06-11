@@ -1,6 +1,5 @@
 # vim: ft=sls
 
-
 {#-
     Stops the jellyfin container services
     and disables them at boot time.
