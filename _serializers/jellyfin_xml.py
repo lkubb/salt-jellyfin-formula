@@ -6,7 +6,7 @@ from collections import defaultdict
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
 
-from salt.serializers import DeserializationError, SerializationError
+from salt.serializers import DeserializationError
 
 __all__ = ["deserialize", "serialize", "available"]
 
@@ -31,7 +31,15 @@ def deserialize(stream_or_string, **options):
 
         # salt.utils.xmlutil does not work for list items, e.g. as seen
         # in ServerConfiguration:SortRemoveCharacters
-        return etree_to_dict(tree)
+        ret = etree_to_dict(tree)
+        # Ensure attributes on the root node do not cause changes
+        ret[next(iter(ret))].update(
+            {
+                "@xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+                "@xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
+            }
+        )
+        return ret
 
     except Exception as error:  # pylint: disable=broad-except
         raise DeserializationError(error)
@@ -45,7 +53,7 @@ def serialize(obj, **options):
     """
 
     # Ensure attributes on the root node are set correctly
-    obj[list(obj.keys())[0]].update(
+    obj[next(iter(obj))].update(
         {
             "@xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
             "@xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
@@ -57,10 +65,11 @@ def serialize(obj, **options):
     # Pretty-print it in mostly Jellyfin format to avoid causing unnecessary diffs
     pp_xmlstr = minidom.parseString(xmlstr).toprettyxml(indent="  ", encoding="utf-8")
     # return string representation and replace empty element endings to avoid diffs
-    return pp_xmlstr.decode().replace("/>", " />")
+    ret = pp_xmlstr.decode().replace("/>", " />")
+    return ret
 
 
-# The following serializers/deserializers are taken from here:
+# The following serializers/deserializers are adapted from here:
 # https://stackoverflow.com/a/10076823
 
 
@@ -77,6 +86,16 @@ def etree_to_dict(t):
         d[t.tag].update(("@" + k, v) for k, v in t.attrib.items())
     if t.text:
         text = t.text.strip()
+        if text in ["true", "false"]:
+            text = text == "true"
+        else:
+            try:
+                text = int(text)
+            except ValueError:
+                try:
+                    text = float(text)
+                except ValueError:
+                    pass
         if children or t.attrib:
             if text:
                 d[t.tag]["#text"] = text
@@ -87,12 +106,12 @@ def etree_to_dict(t):
 
 def dict_to_etree(d):
     def _to_etree(d, root):
-        if not d:
+        if d is None:
             pass
-        elif isinstance(d, str) or isinstance(d, int) or isinstance(d, float):
-            root.text = str(d)
         elif isinstance(d, bool):
             root.text = str(d).lower()
+        elif isinstance(d, str) or isinstance(d, int) or isinstance(d, float):
+            root.text = str(d)
         elif isinstance(d, dict):
             for k, v in d.items():
                 assert isinstance(k, str)
