@@ -111,6 +111,8 @@ Jellyfin is installed:
 Custom Jellyfin xml serializer is installed:
   saltutil.sync_serializers:
     - refresh: true
+    - unless:
+      - '{{ ("jellyfin_xml" in salt["saltutil.list_extmods"]().get("serializers", [])) | lower }}'
 
 {%- if jellyfin.install.autoupdate_service is not none %}
 
