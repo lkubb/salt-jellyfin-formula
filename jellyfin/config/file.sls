@@ -26,7 +26,7 @@ Jellyfin environment files are managed:
     - template: jinja
     - require:
       - user: {{ jellyfin.lookup.user.name }}
-    - watch_in:
+    - require_in:
       - Jellyfin is installed
     - context:
         jellyfin: {{ jellyfin | json }}
@@ -44,7 +44,5 @@ Jellyfin xml config files are managed:
     - require:
       - user: {{ jellyfin.lookup.user.name }}
       - Custom Jellyfin xml serializer is installed
-    - watch_in:
-      - Jellyfin is installed
     - serializer: jellyfin_xml
     - merge_if_exists: true

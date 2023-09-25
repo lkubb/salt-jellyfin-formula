@@ -34,3 +34,4 @@ Jellyfin service is running:
 {%- endif %}
     - watch:
       - Jellyfin is installed
+      - sls: {{ sls_config_file }}
